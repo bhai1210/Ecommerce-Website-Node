@@ -5,7 +5,8 @@ const connectDB = require("./ConfigData/db");
 const authRoutes = require('./routes/authroutes')
 const userRoutes = require('./routes/userroutes')
 const studentRoutes = require("./routes/studentRoutes");
-
+const classRoutes = require('./routes/classroutes')
+const paymentRoutes = require("./routes/paymentRoutes");
 dotenv.config(); // make sure to load .env first
 connectDB();
 
@@ -17,6 +18,8 @@ app.use("/items", require("./routes/itemroutes"));
 app.use("/auth", authRoutes);
 app.use("/users",userRoutes);
 app.use("/api/students",studentRoutes);
+app.use("/class",classRoutes)
+app.use("/api/payments", paymentRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
