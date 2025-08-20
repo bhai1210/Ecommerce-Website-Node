@@ -17,7 +17,7 @@ app.use(express.json());
 app.use("/items", require("./routes/itemroutes"));
 app.use("/auth", authRoutes);
 app.use("/users",userRoutes);
-app.use("/api/students",studentRoutes);
+app.use("/students",studentRoutes);
 app.use("/class",classRoutes)
 app.use("/api/payments", paymentRoutes);
 
