@@ -172,7 +172,7 @@ exports.forgotPassword = async (req, res) => {
         <p>If you did not request a password reset, you can safely ignore this email — your password will remain unchanged.</p>
       </div>
       <div class="footer">
-        <p>⚡ Secure Reset by <strong>GFFF Security Team</strong></p>
+        <p>⚡ Secure Reset by <strong>Baba Shayam Security Team</strong></p>
         <p>&copy; ${new Date().getFullYear()} Your App. All rights reserved.</p>
       </div>
     </div>
