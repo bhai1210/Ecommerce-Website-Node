@@ -11,7 +11,7 @@ const studentinforoutes= require('./routes/studentinforoutes')
 const exptraRoutes= require('./routes/extraroutes')
 dotenv.config(); // make sure to load .env first
 connectDB();
-const path = require("path");
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -24,7 +24,7 @@ app.use("/class",classRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/extra",exptraRoutes);
 app.use('/StudentInfo',studentinforoutes)
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);

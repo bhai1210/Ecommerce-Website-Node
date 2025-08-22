@@ -1,106 +1,87 @@
-const fs = require("fs");
-const path = require("path");
-const StudentInfo = require("../models/studentInfoModel");
+const studentinfomodel = require('../Models/studentinfomodel')
+const studentinfo = require('../Models/studentinfomodel')
 
-// CREATE student
-const createStudent = async (req, res) => {
-  try {
-    const { firstname, lastname, gender } = req.body;
+const createStudent = async (req,res)=> {
+    try{
 
-    if (!firstname) {
-      return res.status(400).json({ message: "Firstname is required" });
+const createStudent = await studentinfo.create(req.body)
+console.log(createStudent,"my post data")
+createStudent.save()
+
+res.status(200).send({data: createStudent,message:"student created succesfully"})
+
+    }catch(err){
+
+        res.status(500).send({message: err.message})
+
+
+
+    }
+}
+
+
+const getallstudent = async (req,res)=> {
+    try{
+
+        const allstudent = await studentinfo.find({})
+
+        res.status(200).send({data:allstudent,message:"alll student data send succesfully"})
+
+    }catch(err){
+           res.status(500).send({message: err.message})
+    }
+}
+
+
+const getstudentbyid = async (req,res)=> {
+    try{
+
+        const studentbyid = await studentinfo.findById(req.params.id)
+        if(!studentbyid) return res.status(400).send("user not found")
+
+            res.status(200).send({data:studentbyid,"message":"student find succesfully"})
+
+
+
+    }catch(err){
+           res.status(500).send({message: err.message})
+    }
+}
+
+
+const updatestudent = async (req,res)=> {
+    try{
+
+
+    const updatestudents = await studentinfo.findByIdAndUpdate(req.params.id,req.body,{new: true})
+    if(!updatestudents){
+        res.status(404).send("student not found that id")
     }
 
-    const student = new StudentInfo({
-      firstname,
-      lastname,
-      gender,
-      image: req.file ? `/uploads/${req.file.filename}` : null,
-    });
+    res.status(200).send({data:updatestudent,"message":"student updated succesfully"})
 
-    await student.save();
-    res.status(201).json({ data: student, message: "Student created successfully" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-// GET all students
-const getAllStudents = async (req, res) => {
-  try {
-    const students = await StudentInfo.find({});
-    res.status(200).json({ data: students, message: "All students fetched successfully" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-// GET student by ID
-const getStudentById = async (req, res) => {
-  try {
-    const student = await StudentInfo.findById(req.params.id);
-    if (!student) return res.status(404).json({ message: "Student not found" });
-
-    res.status(200).json({ data: student, message: "Student fetched successfully" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-// UPDATE student
-const updateStudent = async (req, res) => {
-  try {
-    const { firstname, lastname, gender } = req.body;
-    const student = await StudentInfo.findById(req.params.id);
-
-    if (!student) return res.status(404).json({ message: "Student not found" });
-
-    // If new image uploaded, delete old one
-    if (req.file && student.image) {
-      const oldPath = path.join(__dirname, "..", student.image);
-      if (fs.existsSync(oldPath)) {
-        fs.unlinkSync(oldPath);
-      }
+    }catch(err){
+          res.status(500).send({message: err.message}) 
     }
+}
 
-    student.firstname = firstname || student.firstname;
-    student.lastname = lastname || student.lastname;
-    student.gender = gender || student.gender;
-    if (req.file) {
-      student.image = `/uploads/${req.file.filename}`;
+const deletestudent = async (req,res)=> {
+
+    
+    try{
+
+        const deletestudent = await studentinfo.findByIdAndDelete(req.params.id)
+
+        if(!deletestudent){
+            res.status(404).send("student don't found with this id")
+        }
+
+        res.status(200).send("student deleted succesfully")
+    }catch(err){
+           res.status(500).send({message: err.message})
     }
+}
 
-    await student.save();
-    res.status(200).json({ data: student, message: "Student updated successfully" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
 
-// DELETE student
-const deleteStudent = async (req, res) => {
-  try {
-    const student = await StudentInfo.findByIdAndDelete(req.params.id);
-    if (!student) return res.status(404).json({ message: "Student not found" });
 
-    // delete file if exists
-    if (student.image) {
-      const filePath = path.join(__dirname, "..", student.image);
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
-    }
-
-    res.status(200).json({ message: "Student deleted successfully" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-module.exports = {
-  createStudent,
-  getAllStudents,
-  getStudentById,
-  updateStudent,
-  deleteStudent,
-};
+module.exports = {createStudent,getstudentbyid,getallstudent,updatestudent,deletestudent}

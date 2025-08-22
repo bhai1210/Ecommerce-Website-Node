@@ -1,28 +1,24 @@
 const mongoose = require("mongoose");
 
-const studentInfoSchema = new mongoose.Schema(
-  {
+const studentInfoSchema = new mongoose.Schema({
     firstname: {
-      type: String,
-      required: [true, "Firstname is required"],
-      trim: true,
+        type: String,
+        required: true, // make required if necessary
+        trim: true
     },
     lastname: {
-      type: String,
-      trim: true,
+        type: String,
+        trim: true
     },
     image: {
-      type: String, // file path
-      default: null,
-      trim: true,
+        type: String,
+        trim: true
     },
     gender: {
-      type: String,
-      enum: ["Male", "Female", "Other"],
-      trim: true,
-    },
-  },
-  { timestamps: true }
-);
+        type: String,
+        enum: ["Male", "Female", "Other"], // optional restriction
+        trim: true
+    }
+}, { timestamps: true });
 
 module.exports = mongoose.model("StudentInfo", studentInfoSchema);
