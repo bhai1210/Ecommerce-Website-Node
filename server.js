@@ -1,6 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
+const path = require("path");
 const connectDB = require("./ConfigData/db");
 const authRoutes = require('./routes/authroutes')
 const userRoutes = require('./routes/userroutes')
@@ -11,7 +12,7 @@ const studentinforoutes= require('./routes/studentinforoutes')
 const exptraRoutes= require('./routes/extraroutes')
 dotenv.config(); // make sure to load .env first
 connectDB();
-const path = require("path");
+
 const app = express();
 app.use(cors());
 app.use(express.json());
