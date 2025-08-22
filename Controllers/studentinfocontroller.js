@@ -57,18 +57,18 @@ const updateStudent = async (req, res) => {
 
     // If new image uploaded, delete old one
     if (req.file && student.image) {
-      const oldPath = path.join(__dirname, "..", student.image.replace(/^\//, ""));
-      fs.unlink(oldPath, (err) => {
-        if (err) console.warn("Failed to delete old image:", err.message);
-      });
+      const oldPath = path.join(__dirname, "..", student.image);
+      if (fs.existsSync(oldPath)) {
+        fs.unlinkSync(oldPath);
+      }
     }
 
-    Object.assign(student, {
-      firstname: firstname || student.firstname,
-      lastname: lastname || student.lastname,
-      gender: gender || student.gender,
-      image: req.file ? `/uploads/${req.file.filename}` : student.image,
-    });
+    student.firstname = firstname || student.firstname;
+    student.lastname = lastname || student.lastname;
+    student.gender = gender || student.gender;
+    if (req.file) {
+      student.image = `/uploads/${req.file.filename}`;
+    }
 
     await student.save();
     res.status(200).json({ data: student, message: "Student updated successfully" });
@@ -85,10 +85,10 @@ const deleteStudent = async (req, res) => {
 
     // delete file if exists
     if (student.image) {
-      const filePath = path.join(__dirname, "..", student.image.replace(/^\//, ""));
-      fs.unlink(filePath, (err) => {
-        if (err) console.warn("Failed to delete image:", err.message);
-      });
+      const filePath = path.join(__dirname, "..", student.image);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
     }
 
     res.status(200).json({ message: "Student deleted successfully" });
