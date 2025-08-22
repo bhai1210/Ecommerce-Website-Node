@@ -12,13 +12,23 @@ connectDB();
 
 const app = express();
 
-// ✅ Middleware
-app.use(cors({
-  origin: [
-    "http://localhost:3000",
-    "https://student-management-xi-six.vercel.app"
-  ]
-}));
+const corsOptions = {
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      "http://localhost:3000",
+      "https://student-management-xi-six.vercel.app"
+    ];
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true, // if you need cookies or auth headers
+};
+
+app.use(cors(corsOptions));
+
 app.use(express.json());
 
 // ✅ Routes
@@ -32,7 +42,7 @@ app.use("/studentinfo", require("../routes/studentinfoRoutes"));
 app.use("/items", require("../routes/itemRoutes"));
 
 // Static files (optional for dev)
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+// app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 // ✅ Export both Express app and serverless handler
 module.exports = {
