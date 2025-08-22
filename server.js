@@ -9,6 +9,8 @@ const classRoutes = require('./routes/classroutes')
 const paymentRoutes = require("./routes/paymentRoutes");
 const studentinforoutes= require('./routes/studentinforoutes')
 const exptraRoutes= require('./routes/extraroutes')
+
+// const path = require("path");
 dotenv.config(); // make sure to load .env first
 connectDB();
 
@@ -24,6 +26,8 @@ app.use("/class",classRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/extra",exptraRoutes);
 app.use('/StudentInfo',studentinforoutes)
+
+// app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
