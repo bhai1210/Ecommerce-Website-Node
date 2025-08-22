@@ -20,11 +20,11 @@ connectDB();
 
 const app = express();
 
-// ✅ Fix CORS for both localhost + Vercel
+// ✅ CORS setup
 app.use(cors({
   origin: [
-    "http://localhost:3000",             // Local frontend
-    "https://student-management-xi-six.vercel.app"   // Replace with your actual frontend domain
+    "http://localhost:3000",
+    "https://student-management-xi-six.vercel.app"  // change this to your frontend domain
   ],
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"]
@@ -38,18 +38,18 @@ app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/students", studentRoutes);
 app.use("/class", classRoutes);
-app.use("/payments", paymentRoutes);
+app.use("/api/payments", paymentRoutes);
 app.use("/extra", exptraRoutes);
 app.use("/studentinfo", studentinforoutes);
 
 // Static uploads
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// ✅ Export as serverless handler for Vercel
+// ✅ Export for Vercel
 module.exports = app;
 module.exports.handler = serverless(app);
 
-// ✅ Run locally
+// ✅ Local dev
 if (process.env.NODE_ENV !== "production") {
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
