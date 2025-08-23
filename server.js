@@ -21,7 +21,7 @@ app.use("/auth", authRoutes);
 app.use("/users",userRoutes);
 app.use("/students",studentRoutes);
 app.use("/class",classRoutes);
-app.use("/api/payments", paymentRoutes);
+app.use("/payments", paymentRoutes);
 app.use("/extra",exptraRoutes);
 
 const PORT = process.env.PORT || 5000;

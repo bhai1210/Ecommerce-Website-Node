@@ -7,7 +7,7 @@ const paymentSchema = new mongoose.Schema(
     signature: { type: String },
     amount: { type: Number, required: true },
     currency: { type: String, default: "INR" },
-    status: { type: String, enum: ["created", "paid", "failed"], default: "created" }
+    status: { type: String, enum: ["created", "paid", "failed"], default: "created" },
   },
   { timestamps: true }
 );
