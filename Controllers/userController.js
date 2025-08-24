@@ -1,99 +1,158 @@
 const User = require("../Models/user");
-
-
-const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 
+// ---------- helpers ----------
+const allowedRoles = ["admin", "user"]; // adjust to your app
+const isNonEmptyString = (v) => typeof v === "string" && v.trim().length > 0;
 
+const pickUpdatableFields = (body) => {
+  const out = {};
+  if (isNonEmptyString(body.email)) out.email = body.email.trim();
+  if (isNonEmptyString(body.role)) out.role = body.role.trim();
+  if (isNonEmptyString(body.name)) out.name = body.name.trim(); // optional if you have it
+  return out;
+};
 
-// CREATE a new user
+const sendEmail = async (to, subject, html) => {
+  // Expect these in env:
+  // SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, FROM_EMAIL
+  const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT || 587),
+    secure: false,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  });
+
+  await transporter.sendMail({
+    from: process.env.FROM_EMAIL,
+    to,
+    subject,
+    html,
+  });
+};
+
+// ---------- CREATE ----------
 exports.createUser = async (req, res) => {
-    const { email, password } = req.body;
+  try {
+    const { email, password, role } = req.body;
 
-    try {
-        // Check if email already exists
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ error: "email already taken" });
-        }
-
-        // Hash password
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        const newUser = new User({ email, password: hashedPassword });
-        await newUser.save();
-
-        res.status(201).json({ message: "User created successfully", user: newUser });
-    } catch (err) {
-        res.status(500).json({ error: "Server error" });
+    if (!isNonEmptyString(email) || !isNonEmptyString(password)) {
+      return res.status(400).json({ error: "Email and password are required" });
     }
+
+    if (role && !allowedRoles.includes(role)) {
+      return res.status(400).json({ error: "Invalid role" });
+    }
+
+    const exists = await User.findOne({ email: email.trim().toLowerCase() });
+    if (exists) {
+      return res.status(400).json({ error: "Email already taken" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = await User.create({
+      email: email.trim().toLowerCase(),
+      password: hashedPassword,
+      role: role && allowedRoles.includes(role) ? role : "user",
+    });
+
+    const userSafe = newUser.toObject();
+    delete userSafe.password;
+
+    return res.status(201).json({
+      message: "User created successfully",
+      user: userSafe,
+    });
+  } catch (err) {
+    console.error("createUser error:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
 };
 
-// READ all users
-exports.getAllUsers = async (req, res) => {
-    try {
-        const users = await User.find().select("-password"); // exclude password
-        res.json(users);
-    } catch (err) {
-        res.status(500).json({ error: "Server error" });
-    }
+// ---------- READ (ALL) ----------
+exports.getAllUsers = async (_req, res) => {
+  try {
+    const users = await User.find().select("-password");
+    return res.json(users);
+  } catch (err) {
+    console.error("getAllUsers error:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
 };
 
-// READ single user by ID
+// ---------- READ (ONE) ----------
 exports.getUserById = async (req, res) => {
-    try {
-        const user = await User.findById(req.params.id).select("-password");
-        if (!user) {
-            return res.status(404).json({ error: "User not found" });
-        }
-        res.json(user);
-    } catch (err) {
-        res.status(500).json({ error: "Server error" });
-    }
+  try {
+    const user = await User.findById(req.params.id).select("-password");
+    if (!user) return res.status(404).json({ error: "User not found" });
+    return res.json(user);
+  } catch (err) {
+    console.error("getUserById error:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
 };
 
-// UPDATE user by ID
+// ---------- UPDATE ----------
 exports.updateUser = async (req, res) => {
-    const { email, password } = req.body;
+  try {
+    const { password } = req.body;
 
-    try {
-        let updatedData = { email };
+    // Only allow specific fields to be updated
+    const updates = pickUpdatableFields(req.body);
 
-        if (password) {
-            updatedData.password = await bcrypt.hash(password, 10);
-        }
-
-        const updatedUser = await User.findByIdAndUpdate(
-            req.params.id,
-            updatedData,
-            { new: true }
-        ).select("-password");
-
-        if (!updatedUser) {
-            return res.status(404).json({ error: "User not found" });
-        }
-
-        res.json({ message: "User updated successfully", user: updatedUser });
-    } catch (err) {
-        res.status(500).json({ error: "Server error" });
+    // Validate role if present
+    if (updates.role && !allowedRoles.includes(updates.role)) {
+      return res.status(400).json({ error: "Invalid role" });
     }
+
+    // Handle password only when it's a non-empty string
+    if (isNonEmptyString(password)) {
+      updates.password = await bcrypt.hash(password, 10);
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ error: "No valid fields to update" });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      { $set: updates },
+      {
+        new: true,
+        runValidators: true,
+        context: "query",
+      }
+    ).select("-password");
+
+    if (!updatedUser) return res.status(404).json({ error: "User not found" });
+
+    return res.json({ message: "User updated successfully", user: updatedUser });
+  } catch (err) {
+    console.error("updateUser error:", err);
+    // duplicate email error handling
+    if (err.code === 11000 && err.keyPattern?.email) {
+      return res.status(400).json({ error: "Email already taken" });
+    }
+    return res.status(500).json({ error: "Server error" });
+  }
 };
 
-// DELETE user by ID
+// ---------- DELETE ----------
 exports.deleteUser = async (req, res) => {
-    try {
-        const deletedUser = await User.findByIdAndDelete(req.params.id);
-
-        if (!deletedUser) {
-            return res.status(404).json({ error: "User not found" });
-        }
-
-        res.json({ message: "User deleted successfully" });
-    } catch (err) {
-        res.status(500).json({ error: "Server error" });
-    }
+  try {
+    const deleted = await User.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ error: "User not found" });
+    return res.json({ message: "User deleted successfully" });
+  } catch (err) {
+    console.error("deleteUser error:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
 };
 
 

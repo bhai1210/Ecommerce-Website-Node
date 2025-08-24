@@ -7,6 +7,7 @@ const userRoutes = require('./routes/userroutes')
 const studentRoutes = require("./routes/studentRoutes");
 const classRoutes = require('./routes/classroutes')
 const paymentRoutes = require("./routes/paymentRoutes");
+const datasroutes = require('./routes/datasroutes');
 
 const exptraRoutes= require('./routes/extraroutes')
 dotenv.config(); // make sure to load .env first
@@ -23,6 +24,7 @@ app.use("/students",studentRoutes);
 app.use("/class",classRoutes);
 app.use("/payments", paymentRoutes);
 app.use("/extra",exptraRoutes);
+app.use('/datas',datasroutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
