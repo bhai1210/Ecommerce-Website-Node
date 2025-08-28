@@ -20,30 +20,25 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ✅ File Upload Route with Vercel Blob
 app.post("/uploads", upload.single("file"), async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ message: "No file uploaded" });
-    }
+    const file = req.file;
 
-    // Keep original extension (jpg, png, etc.)
-    const originalName = req.file.originalname;
-    const fileName = `uploads/${Date.now()}-${originalName}`;
+    // infer content type (so browser can render properly)
+    const contentType = file.mimetype || "application/octet-stream";
 
-    // Upload to vercel blob with correct MIME type
-    const { url } = await put(fileName, req.file.buffer, {
+    const blob = await put(`uploads/${Date.now()}-${file.originalname}`, file.buffer, {
       access: "public",
-      contentType: req.file.mimetype,  // ✅ Important for browser preview
+      contentType,   // ✅ important for images
     });
 
     res.json({
       message: "File uploaded successfully",
-      fileUrl: url, // ✅ Directly usable in <img src="">
+      fileUrl: blob.url,  // e.g. https://...vercel-storage.com/xxx.png
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Upload failed", error: err.message });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Upload failed" });
   }
 });
 
