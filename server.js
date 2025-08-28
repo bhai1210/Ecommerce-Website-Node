@@ -1,50 +1,52 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
-const multer = require("multer");
-const path = require("path");
 const connectDB = require("./ConfigData/db");
+const { put } = require("@vercel/blob"); // ✅ import vercel blob
 
 // Import Routes
-const authRoutes = require('./routes/authroutes');
-const userRoutes = require('./routes/userroutes');
+const authRoutes = require("./routes/authroutes");
+const userRoutes = require("./routes/userroutes");
 const studentRoutes = require("./routes/studentRoutes");
-const classRoutes = require('./routes/classroutes');
+const classRoutes = require("./routes/classroutes");
 const paymentRoutes = require("./routes/paymentRoutes");
-const datasroutes = require('./routes/datasroutes');
-const exptraRoutes = require('./routes/extraroutes');
+const datasroutes = require("./routes/datasroutes");
+const exptraRoutes = require("./routes/extraroutes");
 
-dotenv.config(); // make sure to load .env first
+dotenv.config(); 
 connectDB();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 👉 Serve uploaded files (so frontend can access them via URL)
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// ✅ File Upload Route with Vercel Blob
+app.post("/uploads", async (req, res) => {
+  try {
+    if (!req.headers["content-type"]?.startsWith("multipart/form-data")) {
+      return res.status(400).json({ message: "Content-Type must be multipart/form-data" });
+    }
 
-// 📌 Multer Storage Setup
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/"); // folder name
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname)); // unique file name
+    // Collect raw request body (since Express doesn’t parse multipart automatically)
+    const chunks = [];
+    req.on("data", (chunk) => chunks.push(chunk));
+    req.on("end", async () => {
+      const buffer = Buffer.concat(chunks);
+
+      // Save file to Vercel Blob
+      const blob = await put(`uploads/${Date.now()}.bin`, buffer, {
+        access: "public", // so frontend can access
+      });
+
+      res.json({
+        message: "File uploaded successfully",
+        fileUrl: blob.url, // ✅ Blob URL instead of local path
+      });
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "File upload failed", error });
   }
-});
-
-const upload = multer({ storage: storage });
-
-// 👉 File Upload Route
-app.post("/uploads", upload.single("file"), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: "No file uploaded" });
-  }
-  res.json({
-    message: "File uploaded successfully",
-    filePath: `/uploads/${req.file.filename}`
-  });
 });
 
 // Existing Routes
