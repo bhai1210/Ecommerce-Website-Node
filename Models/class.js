@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-
 const classSchema = new mongoose.Schema(
   {
     name: {
@@ -23,9 +22,12 @@ const classSchema = new mongoose.Schema(
         ref: "Student", // Optional: list of students in this class
       },
     ],
+    image: {
+      type: String, // store image URL or file path
+      default: null, // optional
+    },
   },
   { timestamps: true }
 );
 
-
-module.exports = mongoose.model('Class',classSchema);
+module.exports = mongoose.model('Class', classSchema);
