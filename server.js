@@ -21,31 +21,29 @@ app.use(cors());
 app.use(express.json());
 
 // ✅ File Upload Route with Vercel Blob
-app.post("/uploads", async (req, res) => {
+app.post("/uploads", upload.single("file"), async (req, res) => {
   try {
-    if (!req.headers["content-type"]?.startsWith("multipart/form-data")) {
-      return res.status(400).json({ message: "Content-Type must be multipart/form-data" });
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
     }
 
-    // Collect raw request body (since Express doesn’t parse multipart automatically)
-    const chunks = [];
-    req.on("data", (chunk) => chunks.push(chunk));
-    req.on("end", async () => {
-      const buffer = Buffer.concat(chunks);
+    // Keep original extension (jpg, png, etc.)
+    const originalName = req.file.originalname;
+    const fileName = `uploads/${Date.now()}-${originalName}`;
 
-      // Save file to Vercel Blob
-      const blob = await put(`uploads/${Date.now()}.bin`, buffer, {
-        access: "public", // so frontend can access
-      });
-
-      res.json({
-        message: "File uploaded successfully",
-        fileUrl: blob.url, // ✅ Blob URL instead of local path
-      });
+    // Upload to vercel blob with correct MIME type
+    const { url } = await put(fileName, req.file.buffer, {
+      access: "public",
+      contentType: req.file.mimetype,  // ✅ Important for browser preview
     });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "File upload failed", error });
+
+    res.json({
+      message: "File uploaded successfully",
+      fileUrl: url, // ✅ Directly usable in <img src="">
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Upload failed", error: err.message });
   }
 });
 
