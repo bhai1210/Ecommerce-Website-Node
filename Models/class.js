@@ -4,30 +4,29 @@ const classSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true, // e.g., "10th Grade - Section A"
+      required: true,
       trim: true,
     },
-    subject: {
+    price: {
       type: String,
-      required: true, // e.g., "Mathematics"
-    },
-    teacher: {
-      type: String,
-      ref: "Teacher", // Reference to Teacher model
       required: true,
     },
-    students: [
+    description: {
+      type: String, // just store text
+      required: true,
+    },
+    stockcount: [
       {
-        type: String,
-        ref: "Student", // Optional: list of students in this class
+         type: String, // just store text
+      required: true,
       },
     ],
     image: {
       type: String, // store image URL or file path
-      default: null, // optional
+      default: null,
     },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model('Class', classSchema);
+module.exports = mongoose.model("Class", classSchema);

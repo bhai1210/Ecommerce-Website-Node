@@ -1,100 +1,108 @@
 const ClassModel = require('../Models/class');
 
 // ✅ Create Class
-const Createclass = async (req, res) => {
+const CreateClass = async (req, res) => {
   try {
-    const { name, subject, students, teacher, image } = req.body; // added image
-    const user = new ClassModel({
+    const { name, price, description, stockcount, image } = req.body;
+
+    const newClass = new ClassModel({
       name,
-      subject,
-      teacher,
-      students,
-      image, // save image URL or path
+      price,
+      description,
+      stockcount, // should be an array (e.g., ["10", "20"])
+      image,
     });
-    await user.save(); // ✅ await to ensure saving
-    res.status(200).send({ message: "Class saved successfully" });
+
+    await newClass.save();
+
+    res.status(201).json({
+      message: "Class created successfully",
+      data: newClass,
+    });
   } catch (err) {
-    return res.status(500).send("Internal server error");
+    console.error("CreateClass Error:", err);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
 // ✅ Get All Classes
-const getalluser = async (req, res) => {
+const getAllClasses = async (req, res) => {
   try {
-    const allclass = await ClassModel.find();
-    res.status(200).send({
-      message: "All class data sent successfully",
-      data: allclass,
+    const allClasses = await ClassModel.find();
+    res.status(200).json({
+      message: "All classes fetched successfully",
+      data: allClasses,
     });
   } catch (err) {
-    return res.status(500).send("Internal server error");
+    console.error("getAllClasses Error:", err);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
 // ✅ Get Class by ID
-const getuserbyid = async (req, res) => {
+const getClassById = async (req, res) => {
   try {
-    const finduserbyid = await ClassModel.findById(req.params.id); // ✅ added await
-    if (!finduserbyid) {
-      return res.status(404).send({ message: "Class not found" });
+    const classData = await ClassModel.findById(req.params.id);
+    if (!classData) {
+      return res.status(404).json({ message: "Class not found" });
     }
-    res.status(200).send({
-      message: "Class found by ID",
-      data: finduserbyid,
+    res.status(200).json({
+      message: "Class fetched successfully",
+      data: classData,
     });
   } catch (err) {
-    return res.status(500).send("Internal server error");
+    console.error("getClassById Error:", err);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
 // ✅ Update Class
-const getclassupdate = async (req, res) => {
+const updateClass = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, subject, students, teacher, image } = req.body; // added image
-    const userupdated = await ClassModel.findByIdAndUpdate(
+    const { name, price, description, stockcount, image } = req.body;
+
+    const updatedClass = await ClassModel.findByIdAndUpdate(
       id,
-      {
-        name,
-        subject,
-        students,
-        teacher,
-        image, // update image if provided
-      },
-      { new: true } // ✅ returns updated doc
+      { name, price, description, stockcount, image },
+      { new: true }
     );
 
-    if (!userupdated) {
-      return res.status(404).send({ message: "Class not found" });
+    if (!updatedClass) {
+      return res.status(404).json({ message: "Class not found" });
     }
 
-    return res.status(200).send({
-      message: "Data updated successfully",
-      updateduser: userupdated,
+    res.status(200).json({
+      message: "Class updated successfully",
+      data: updatedClass,
     });
   } catch (err) {
-    res.status(500).send("Internal Server error");
+    console.error("updateClass Error:", err);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
 // ✅ Delete Class
-const deleteuser = async (req, res) => {
+const deleteClass = async (req, res) => {
   try {
     const { id } = req.params;
-    const deleteuser = await ClassModel.findByIdAndDelete(id);
-    if (!deleteuser) {
-      return res.status(404).send({ message: "Class not found" });
+    const deletedClass = await ClassModel.findByIdAndDelete(id);
+
+    if (!deletedClass) {
+      return res.status(404).json({ message: "Class not found" });
     }
-    return res.status(200).send("Class deleted successfully");
+
+    res.status(200).json({ message: "Class deleted successfully" });
   } catch (err) {
-    return res.status(500).send({ message: err.message });
+    console.error("deleteClass Error:", err);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
 module.exports = {
-  getalluser,
-  getuserbyid,
-  deleteuser,
-  getclassupdate,
-  Createclass,
+  CreateClass,
+  getAllClasses,
+  getClassById,
+  updateClass,
+  deleteClass,
 };

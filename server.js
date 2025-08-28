@@ -21,7 +21,8 @@ const app = express();
 
 // ✅ Fix CORS (allow frontend domain explicitly)
 app.use(cors({
-  origin: process.env.CLIENT_URL || "*",   // e.g. "http://localhost:3000" or your Vercel frontend
+  origin: process.env.CLIENT_URL || "*",  
+    // origin: "http://localhost:3000", 
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
