@@ -25,10 +25,30 @@ const CreateClass = async (req, res) => {
   }
 };
 
-// ✅ Get All Classes
+// ✅ Get All Classes (with Search + Price filter)
 const getAllClasses = async (req, res) => {
   try {
-    const allClasses = await ClassModel.find();
+    const { search, minPrice, maxPrice } = req.query;
+
+    let filter = {};
+
+    // 🔍 Search filter
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    // 💰 Price filter
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) filter.price.$gte = Number(minPrice);
+      if (maxPrice) filter.price.$lte = Number(maxPrice);
+    }
+
+    const allClasses = await ClassModel.find(filter);
+
     res.status(200).json({
       message: "All classes fetched successfully",
       data: allClasses,
