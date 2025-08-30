@@ -5,11 +5,15 @@ const CreateClass = async (req, res) => {
   try {
     const { name, price, description, stockcount, image, category } = req.body;
 
+    if (!mongoose.Types.ObjectId.isValid(category)) {
+      return res.status(400).json({ message: "Invalid category ID" });
+    }
+
     const newClass = new ClassModel({
       name,
       price,
       description,
-      stockcount, // should be an array (e.g., ["10", "20"])
+      stockcount,
       image,
       category,
     });
