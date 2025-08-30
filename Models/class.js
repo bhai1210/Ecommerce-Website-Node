@@ -1,16 +1,16 @@
-const mongoose = require('mongoose');
+// Models/class.js
+const mongoose = require("mongoose");
 
 const classSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
-    price: { type: Number, required: true }, // Changed to Number
+    price: { type: Number, required: true },
     description: { type: String, required: true },
-    stockcount: [{ type: Number, required: true }], // Changed to Number
+    stockcount: [{ type: Number, required: true }],
     image: { type: String, default: null },
-    category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true },
+    category: { type: Number, required: true }, // Changed to Number
   },
   { timestamps: true }
 );
-
 
 module.exports = mongoose.model("Class", classSchema);

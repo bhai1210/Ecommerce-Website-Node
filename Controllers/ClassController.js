@@ -1,40 +1,37 @@
-const ClassModel = require('../Models/class');
+// Controllers/ClassController.js
+const ClassModel = require("../Models/class");
 
-// ✅ Create Class
+// Create Class
 const CreateClass = async (req, res) => {
   try {
     const { name, price, description, stockcount, image, category } = req.body;
 
-    if (!mongoose.Types.ObjectId.isValid(category)) {
-      return res.status(400).json({ message: "Invalid category ID" });
+    if (!category || isNaN(Number(category))) {
+      return res.status(400).json({ message: "Category must be a number" });
     }
 
     const newClass = new ClassModel({
       name,
-      price,
+      price: Number(price),
       description,
-      stockcount,
+      stockcount: stockcount.map(Number), // ensure array of numbers
       image,
-      category,
+      category: Number(category),
     });
 
     await newClass.save();
 
-    res.status(201).json({
-      message: "Class created successfully",
-      data: newClass,
-    });
+    res.status(201).json({ message: "Class created successfully", data: newClass });
   } catch (err) {
     console.error("CreateClass Error:", err);
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
-// ✅ Get All Classes (with Search + Price filter + Category populate)
+// Get All Classes
 const getAllClasses = async (req, res) => {
   try {
     const { search, minPrice, maxPrice } = req.query;
-
     let filter = {};
 
     if (search) {
@@ -50,37 +47,15 @@ const getAllClasses = async (req, res) => {
       if (maxPrice) filter.price.$lte = Number(maxPrice);
     }
 
-    const allClasses = await ClassModel.find(filter)
-      .populate("category", "name"); // ✅ populate only category name & id
-
-    res.status(200).json({
-      message: "All classes fetched successfully",
-      data: allClasses,
-    });
+    const allClasses = await ClassModel.find(filter);
+    res.status(200).json({ message: "All classes fetched successfully", data: allClasses });
   } catch (err) {
     console.error("getAllClasses Error:", err);
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
-// ✅ Get Class by ID (with Category populate)
-const getClassById = async (req, res) => {
-  try {
-    const classData = await ClassModel.findById(req.params.id).populate("category", "name");
-    if (!classData) {
-      return res.status(404).json({ message: "Class not found" });
-    }
-    res.status(200).json({
-      message: "Class fetched successfully",
-      data: classData,
-    });
-  } catch (err) {
-    console.error("getClassById Error:", err);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-// ✅ Update Class
+// Update Class
 const updateClass = async (req, res) => {
   try {
     const { id } = req.params;
@@ -88,33 +63,33 @@ const updateClass = async (req, res) => {
 
     const updatedClass = await ClassModel.findByIdAndUpdate(
       id,
-      { name, price, description, stockcount, image, category },
+      {
+        name,
+        price: Number(price),
+        description,
+        stockcount: stockcount.map(Number),
+        image,
+        category: Number(category),
+      },
       { new: true }
-    ).populate("category", "name");
+    );
 
-    if (!updatedClass) {
-      return res.status(404).json({ message: "Class not found" });
-    }
+    if (!updatedClass) return res.status(404).json({ message: "Class not found" });
 
-    res.status(200).json({
-      message: "Class updated successfully",
-      data: updatedClass,
-    });
+    res.status(200).json({ message: "Class updated successfully", data: updatedClass });
   } catch (err) {
     console.error("updateClass Error:", err);
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
-// ✅ Delete Class
+// Delete Class
 const deleteClass = async (req, res) => {
   try {
     const { id } = req.params;
     const deletedClass = await ClassModel.findByIdAndDelete(id);
 
-    if (!deletedClass) {
-      return res.status(404).json({ message: "Class not found" });
-    }
+    if (!deletedClass) return res.status(404).json({ message: "Class not found" });
 
     res.status(200).json({ message: "Class deleted successfully" });
   } catch (err) {
@@ -126,7 +101,6 @@ const deleteClass = async (req, res) => {
 module.exports = {
   CreateClass,
   getAllClasses,
-  getClassById,
   updateClass,
   deleteClass,
 };
