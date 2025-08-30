@@ -1,4 +1,3 @@
-// Controllers/ClassController.js
 const ClassModel = require("../Models/class");
 
 // Create Class
@@ -14,13 +13,14 @@ const CreateClass = async (req, res) => {
       name,
       price: Number(price),
       description,
-      stockcount: stockcount.map(Number), // ensure array of numbers
+      stockcount: Array.isArray(stockcount)
+        ? stockcount.map(Number)
+        : [Number(stockcount)],
       image,
       category: Number(category),
     });
 
     await newClass.save();
-
     res.status(201).json({ message: "Class created successfully", data: newClass });
   } catch (err) {
     console.error("CreateClass Error:", err);
@@ -61,13 +61,19 @@ const updateClass = async (req, res) => {
     const { id } = req.params;
     const { name, price, description, stockcount, image, category } = req.body;
 
+    if (!category || isNaN(Number(category))) {
+      return res.status(400).json({ message: "Category must be a number" });
+    }
+
     const updatedClass = await ClassModel.findByIdAndUpdate(
       id,
       {
         name,
         price: Number(price),
         description,
-        stockcount: stockcount.map(Number),
+        stockcount: Array.isArray(stockcount)
+          ? stockcount.map(Number)
+          : [Number(stockcount)],
         image,
         category: Number(category),
       },

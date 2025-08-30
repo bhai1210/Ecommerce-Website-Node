@@ -1,4 +1,3 @@
-// Models/class.js
 const mongoose = require("mongoose");
 
 const classSchema = new mongoose.Schema(
@@ -8,7 +7,7 @@ const classSchema = new mongoose.Schema(
     description: { type: String, required: true },
     stockcount: [{ type: Number, required: true }],
     image: { type: String, default: null },
-    category: { type: Number, required: true }, // Changed to Number
+    category: { type: Number, required: true }, // ✅ Must be a number
   },
   { timestamps: true }
 );
