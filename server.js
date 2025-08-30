@@ -13,7 +13,7 @@ const classRoutes = require("./routes/classroutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const datasroutes = require("./routes/datasroutes");
 const exptraRoutes = require("./routes/extraroutes");
-
+const categoryRoutes = require('./routes/categoryRoutes')
 dotenv.config();
 connectDB();
 
@@ -21,7 +21,8 @@ const app = express();
 
 // ✅ Fix CORS (allow frontend domain explicitly)
 app.use(cors({
-  origin: process.env.CLIENT_URL || "*",   // e.g. "http://localhost:3000" or your Vercel frontend
+  // origin: process.env.CLIENT_URL || "*",   
+  origin: "http://localhost:3000",
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
@@ -70,6 +71,7 @@ app.use("/class", classRoutes);
 app.use("/payments", paymentRoutes);
 app.use("/extra", exptraRoutes);
 app.use("/datas", datasroutes);
+app.use("/categories", categoryRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

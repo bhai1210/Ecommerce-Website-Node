@@ -3,7 +3,7 @@ const ClassModel = require('../Models/class');
 // ✅ Create Class
 const CreateClass = async (req, res) => {
   try {
-    const { name, price, description, stockcount, image } = req.body;
+    const { name, price, description, stockcount, image, category } = req.body;
 
     const newClass = new ClassModel({
       name,
@@ -11,6 +11,7 @@ const CreateClass = async (req, res) => {
       description,
       stockcount, // should be an array (e.g., ["10", "20"])
       image,
+      category,
     });
 
     await newClass.save();
@@ -25,14 +26,13 @@ const CreateClass = async (req, res) => {
   }
 };
 
-// ✅ Get All Classes (with Search + Price filter)
+// ✅ Get All Classes (with Search + Price filter + Category populate)
 const getAllClasses = async (req, res) => {
   try {
     const { search, minPrice, maxPrice } = req.query;
 
     let filter = {};
 
-    // 🔍 Search filter
     if (search) {
       filter.$or = [
         { name: { $regex: search, $options: "i" } },
@@ -40,14 +40,14 @@ const getAllClasses = async (req, res) => {
       ];
     }
 
-    // 💰 Price filter
     if (minPrice || maxPrice) {
       filter.price = {};
       if (minPrice) filter.price.$gte = Number(minPrice);
       if (maxPrice) filter.price.$lte = Number(maxPrice);
     }
 
-    const allClasses = await ClassModel.find(filter);
+    const allClasses = await ClassModel.find(filter)
+      .populate("category", "name"); // ✅ populate only category name & id
 
     res.status(200).json({
       message: "All classes fetched successfully",
@@ -59,10 +59,10 @@ const getAllClasses = async (req, res) => {
   }
 };
 
-// ✅ Get Class by ID
+// ✅ Get Class by ID (with Category populate)
 const getClassById = async (req, res) => {
   try {
-    const classData = await ClassModel.findById(req.params.id);
+    const classData = await ClassModel.findById(req.params.id).populate("category", "name");
     if (!classData) {
       return res.status(404).json({ message: "Class not found" });
     }
@@ -80,13 +80,13 @@ const getClassById = async (req, res) => {
 const updateClass = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, price, description, stockcount, image } = req.body;
+    const { name, price, description, stockcount, image, category } = req.body;
 
     const updatedClass = await ClassModel.findByIdAndUpdate(
       id,
-      { name, price, description, stockcount, image },
+      { name, price, description, stockcount, image, category },
       { new: true }
-    );
+    ).populate("category", "name");
 
     if (!updatedClass) {
       return res.status(404).json({ message: "Class not found" });

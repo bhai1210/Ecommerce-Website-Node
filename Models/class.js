@@ -17,13 +17,18 @@ const classSchema = new mongoose.Schema(
     },
     stockcount: [
       {
-         type: String, // just store text
-      required: true,
+        type: String, // just store text
+        required: true,
       },
     ],
     image: {
       type: String, // store image URL or file path
       default: null,
+    },
+    category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category", // Reference to Category model
+      required: true,
     },
   },
   { timestamps: true }
