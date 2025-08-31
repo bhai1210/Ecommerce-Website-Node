@@ -1,4 +1,5 @@
 const ClassModel = require("../Models/class");
+const CategoryModel = require("../Models/category");
 
 // Create Class
 const CreateClass = async (req, res) => {
@@ -21,17 +22,19 @@ const CreateClass = async (req, res) => {
     });
 
     await newClass.save();
-    res.status(201).json({ message: "Class created successfully", data: newClass });
+    res
+      .status(201)
+      .json({ message: "Class created successfully", data: newClass });
   } catch (err) {
     console.error("CreateClass Error:", err);
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
-// Get All Classes
+// Get All Classes with search & category filter
 const getAllClasses = async (req, res) => {
   try {
-    const { search, minPrice, maxPrice } = req.query;
+    const { search, category, minPrice, maxPrice } = req.query;
     let filter = {};
 
     if (search) {
@@ -41,6 +44,10 @@ const getAllClasses = async (req, res) => {
       ];
     }
 
+    if (category) {
+      filter.category = Number(category);
+    }
+
     if (minPrice || maxPrice) {
       filter.price = {};
       if (minPrice) filter.price.$gte = Number(minPrice);
@@ -48,9 +55,27 @@ const getAllClasses = async (req, res) => {
     }
 
     const allClasses = await ClassModel.find(filter);
-    res.status(200).json({ message: "All classes fetched successfully", data: allClasses });
+    res
+      .status(200)
+      .json({ message: "All classes fetched successfully", data: allClasses });
   } catch (err) {
     console.error("getAllClasses Error:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Get All Categories
+const getAllCategories = async (req, res) => {
+  try {
+    const categories = await CategoryModel.find();
+    res.status(200).json(
+      categories.map((cat) => ({
+        id: cat._id,
+        name: cat.name,
+      }))
+    );
+  } catch (err) {
+    console.error("getAllCategories Error:", err);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -82,7 +107,9 @@ const updateClass = async (req, res) => {
 
     if (!updatedClass) return res.status(404).json({ message: "Class not found" });
 
-    res.status(200).json({ message: "Class updated successfully", data: updatedClass });
+    res
+      .status(200)
+      .json({ message: "Class updated successfully", data: updatedClass });
   } catch (err) {
     console.error("updateClass Error:", err);
     res.status(500).json({ message: "Internal server error" });
@@ -107,6 +134,7 @@ const deleteClass = async (req, res) => {
 module.exports = {
   CreateClass,
   getAllClasses,
+  getAllCategories,
   updateClass,
   deleteClass,
 };
