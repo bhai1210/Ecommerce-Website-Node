@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 
 // ---------- helpers ----------
-const allowedRoles = ["admin", "user"]; // adjust to your app
+const allowedRoles = ["admin", "user","user2"]; // adjust to your app
 const isNonEmptyString = (v) => typeof v === "string" && v.trim().length > 0;
 
 const pickUpdatableFields = (body) => {
