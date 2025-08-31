@@ -1,7 +1,8 @@
 const Category = require("../Models/categoryModel");
 
+
 // Get all categories
-exports.getCategories = async (req, res) => {
+ const getCategories = async (req, res) => {
   try {
     const categories = await Category.find().sort({ createdAt: -1 });
     res.json(categories);
@@ -12,7 +13,7 @@ exports.getCategories = async (req, res) => {
 };
 
 // Add a new category
-exports.addCategory = async (req, res) => {
+ const addCategory = async (req, res) => {
   try {
     const category = new Category({ name: req.body.name });
     await category.save();
@@ -24,7 +25,7 @@ exports.addCategory = async (req, res) => {
 };
 
 // Update category
-exports.updateCategory = async (req, res) => {
+ const updateCategory = async (req, res) => {
   try {
     const category = await Category.findByIdAndUpdate(
       req.params.id,
@@ -40,7 +41,7 @@ exports.updateCategory = async (req, res) => {
 };
 
 // Delete category
-exports.deleteCategory = async (req, res) => {
+const deleteCategory = async (req, res) => {
   try {
     const category = await Category.findByIdAndDelete(req.params.id);
     if (!category) return res.status(404).json({ message: "Category not found" });
@@ -50,3 +51,5 @@ exports.deleteCategory = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+module.exports = {deleteCategory,getCategories,updateCategory,addCategory}
