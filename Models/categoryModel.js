@@ -1,30 +1,43 @@
-// models/categoryModel.js
+const mongoose = require('mongoose');
 
-// Temporary in-memory DB
-let categories = [
-  { id: 1, name: "Electronics" },
-  { id: 2, name: "Clothing" },
-];
+const categorySchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+  },
+  { timestamps: true }
+);
 
-function getCategories() {
-  return categories;
+const Category = mongoose.model('Category', categorySchema);
+
+// Get all categories
+async function getCategories() {
+  return await Category.find().sort({ createdAt: -1 });
 }
 
-function addCategory(name) {
-  const newCategory = { id: Date.now(), name };
-  categories.push(newCategory);
-  return newCategory;
+// Add a new category
+async function addCategory(name) {
+  const category = new Category({ name });
+  await category.save();
+  return category;
 }
 
-function updateCategory(id, name) {
-  categories = categories.map((cat) =>
-    cat.id == id ? { ...cat, name } : cat
+// Update a category
+async function updateCategory(id, name) {
+  const category = await Category.findByIdAndUpdate(
+    id,
+    { name },
+    { new: true }
   );
-  return categories.find((cat) => cat.id == id);
+  return category;
 }
 
-function deleteCategory(id) {
-  categories = categories.filter((cat) => cat.id != id);
+// Delete a category
+async function deleteCategory(id) {
+  await Category.findByIdAndDelete(id);
   return true;
 }
 
