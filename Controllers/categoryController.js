@@ -1,56 +1,52 @@
+const Category = require("../Models/categoryModel");
 
-
-const Category = require('../Models/categoryModel')
 // Get all categories
-async function getCategories() {
+exports.getCategories = async (req, res) => {
   try {
-    return await Category.find().sort({ createdAt: -1 });
+    const categories = await Category.find().sort({ createdAt: -1 });
+    res.json(categories);
   } catch (error) {
-    throw new Error('Error fetching categories: ' + error.message);
+    console.error("Error fetching categories:", error);
+    res.status(500).json({ message: error.message });
   }
-}
+};
 
 // Add a new category
-async function addCategory(name) {
+exports.addCategory = async (req, res) => {
   try {
-    const category = new Category({ name });
+    const category = new Category({ name: req.body.name });
     await category.save();
-    return category;
+    res.status(201).json(category);
   } catch (error) {
-    throw new Error('Error adding category: ' + error.message);
+    console.error("Error adding category:", error);
+    res.status(500).json({ message: error.message });
   }
-}
+};
 
-// Update a category
-async function updateCategory(id, name) {
+// Update category
+exports.updateCategory = async (req, res) => {
   try {
     const category = await Category.findByIdAndUpdate(
-      id,
-      { name },
+      req.params.id,
+      { name: req.body.name },
       { new: true }
     );
-
-    if (!category) throw new Error('Category not found');
-    return category;
+    if (!category) return res.status(404).json({ message: "Category not found" });
+    res.json(category);
   } catch (error) {
-    throw new Error('Error updating category: ' + error.message);
+    console.error("Error updating category:", error);
+    res.status(500).json({ message: error.message });
   }
-}
+};
 
-// Delete a category
-async function deleteCategory(id) {
+// Delete category
+exports.deleteCategory = async (req, res) => {
   try {
-    const category = await Category.findByIdAndDelete(id);
-    if (!category) throw new Error('Category not found');
-    return true;
+    const category = await Category.findByIdAndDelete(req.params.id);
+    if (!category) return res.status(404).json({ message: "Category not found" });
+    res.json({ message: "Category deleted" });
   } catch (error) {
-    throw new Error('Error deleting category: ' + error.message);
+    console.error("Error deleting category:", error);
+    res.status(500).json({ message: error.message });
   }
-}
-
-module.exports = {
-  getCategories,
-  addCategory,
-  updateCategory,
-  deleteCategory,
 };

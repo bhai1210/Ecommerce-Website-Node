@@ -7,7 +7,11 @@ const classSchema = new mongoose.Schema(
     description: { type: String, required: true },
     stockcount: [{ type: Number, required: true }],
     image: { type: String, default: null },
-    category: { type: Number, required: true }, // ✅ Must be a number
+     category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+      required: true,
+    },
   },
   { timestamps: true }
 );
