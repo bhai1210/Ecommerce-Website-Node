@@ -14,6 +14,7 @@ const paymentRoutes = require("./routes/paymentRoutes");
 const datasroutes = require("./routes/datasroutes");
 const exptraRoutes = require("./routes/extraroutes");
 const categoryRoutes = require('./routes/categoryRoutes')
+const employeeRoutes = require("./routes/employeeRoutes");
 dotenv.config();
 connectDB();
 
@@ -73,6 +74,7 @@ app.use("/extra", exptraRoutes);
 app.use("/datas", datasroutes);
 app.use("/categories", categoryRoutes);
 
+app.use("/employees", employeeRoutes);
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
