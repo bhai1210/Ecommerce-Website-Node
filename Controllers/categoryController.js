@@ -1,4 +1,6 @@
-const Category = require("../Models/categoryModel");
+
+
+const Category = require('../Models/categoryModel')
 
 
 // Get all categories
