@@ -67,16 +67,11 @@ app.post("/uploads", upload.single("file"), async (req, res) => {
 
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
-
 app.use("/class", classRoutes);
 app.use("/payments", paymentRoutes);
-
-
 app.use("/categories", categoryRoutes);
 app.use("/sales", salesRoutes);
 app.use("/heatmap", heatmapRoutes);
-
-
 app.use("/employees", employeeRoutes);
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
