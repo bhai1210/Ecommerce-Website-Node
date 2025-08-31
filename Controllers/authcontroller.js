@@ -12,28 +12,45 @@ const generateToken = (payload, expiresIn = "1h") => {
 // @desc Register a new user
 // controllers/authController.js
 exports.registerUser = async (req, res) => {
-  const { email, password, role } = req.body; // add role here
+  const { email, password, role } = req.body;
 
   try {
     if (!email || !password) {
       return res.status(400).json({ error: "Email and password are required" });
     }
 
+    // ✅ Allowed roles
+    const allowedRoles = ["admin", "user", "user2"];
+    const assignedRole = allowedRoles.includes(role) ? role : "user";
+
+    // ✅ Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ error: "User already exists" });
     }
 
+    // ✅ Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ email, password: hashedPassword, role: role || "user" });
+
+    // ✅ Create user with validated role
+    const user = new User({
+      email,
+      password: hashedPassword,
+      role: assignedRole,
+    });
+
     await user.save();
 
-    res.status(201).json({ message: `${role || "User"} registered successfully` });
+    res.status(201).json({
+      message: `${assignedRole} registered successfully`,
+      user: { email: user.email, role: user.role },
+    });
   } catch (err) {
     console.error("Register Error:", err);
     res.status(500).json({ error: "Server error" });
   }
 };
+
 
 
 // @desc Login user
