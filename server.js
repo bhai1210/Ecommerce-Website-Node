@@ -8,11 +8,9 @@ const { put } = require("@vercel/blob"); // ✅ vercel blob
 // Import Routes
 const authRoutes = require("./routes/authroutes");
 const userRoutes = require("./routes/userroutes");
-const studentRoutes = require("./routes/studentRoutes");
 const classRoutes = require("./routes/classroutes");
 const paymentRoutes = require("./routes/paymentRoutes");
-const datasroutes = require("./routes/datasroutes");
-const exptraRoutes = require("./routes/extraroutes");
+
 const categoryRoutes = require('./routes/categoryRoutes')
 const employeeRoutes = require("./routes/employeeRoutes");
 const salesRoutes = require("./routes/sales"); // adjust path
@@ -66,14 +64,14 @@ app.post("/uploads", upload.single("file"), async (req, res) => {
 });
 
 // ✅ Existing Routes
-app.use("/items", require("./routes/itemroutes"));
+
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
-app.use("/students", studentRoutes);
+
 app.use("/class", classRoutes);
 app.use("/payments", paymentRoutes);
-app.use("/extra", exptraRoutes);
-app.use("/datas", datasroutes);
+
+
 app.use("/categories", categoryRoutes);
 app.use("/sales", salesRoutes);
 app.use("/heatmap", heatmapRoutes);
