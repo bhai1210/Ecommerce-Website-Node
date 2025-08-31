@@ -2,6 +2,8 @@ const Category = require("../Models/categoryModel");
 
 
 // Get all categories
+
+// hi my name is rahul
  const getCategories = async (req, res) => {
   try {
     const categories = await Category.find().sort({ createdAt: -1 });
