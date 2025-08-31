@@ -1,5 +1,5 @@
 const ClassModel = require("../Models/class");
-const CategoryModel = require("../Models/category");
+const CategoryModel = require("../Models/categoryModel");
 
 // Create Class
 const CreateClass = async (req, res) => {
