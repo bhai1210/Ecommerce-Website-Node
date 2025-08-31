@@ -99,47 +99,30 @@ exports.getUserById = async (req, res) => {
 };
 
 // ---------- UPDATE ----------
+// UPDATE USER (password optional)
 exports.updateUser = async (req, res) => {
+  const { id } = req.params;
+  const { email, password, role } = req.body;
+
   try {
-    const { password } = req.body;
-
-    // Only allow specific fields to be updated
-    const updates = pickUpdatableFields(req.body);
-
-    // Validate role if present
-    if (updates.role && !allowedRoles.includes(updates.role)) {
-      return res.status(400).json({ error: "Invalid role" });
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
     }
 
-    // Handle password only when it's a non-empty string
-    if (isNonEmptyString(password)) {
-      updates.password = await bcrypt.hash(password, 10);
+    if (email) user.email = email;
+    if (role) user.role = role;
+
+    // Password only updated if provided
+    if (password && password.trim() !== "") {
+      user.password = await bcrypt.hash(password, 10);
     }
 
-    if (Object.keys(updates).length === 0) {
-      return res.status(400).json({ error: "No valid fields to update" });
-    }
-
-    const updatedUser = await User.findByIdAndUpdate(
-      req.params.id,
-      { $set: updates },
-      {
-        new: true,
-        runValidators: true,
-        context: "query",
-      }
-    ).select("-password");
-
-    if (!updatedUser) return res.status(404).json({ error: "User not found" });
-
-    return res.json({ message: "User updated successfully", user: updatedUser });
+    await user.save();
+    res.status(200).json({ message: "User updated successfully", user });
   } catch (err) {
-    console.error("updateUser error:", err);
-    // duplicate email error handling
-    if (err.code === 11000 && err.keyPattern?.email) {
-      return res.status(400).json({ error: "Email already taken" });
-    }
-    return res.status(500).json({ error: "Server error" });
+    console.error("Update Error:", err);
+    res.status(500).json({ error: "Server error" });
   }
 };
 

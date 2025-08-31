@@ -19,32 +19,20 @@ exports.registerUser = async (req, res) => {
       return res.status(400).json({ error: "Email and password are required" });
     }
 
-    // ✅ Allowed roles
-    const allowedRoles = ["admin", "user", "user2"];
-    const assignedRole = allowedRoles.includes(role) ? role : "user";
-
-    // ✅ Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ error: "User already exists" });
     }
 
-    // ✅ Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // ✅ Create user with validated role
     const user = new User({
       email,
       password: hashedPassword,
-      role: assignedRole,
+      role: role || "user",
     });
 
     await user.save();
-
-    res.status(201).json({
-      message: `${assignedRole} registered successfully`,
-      user: { email: user.email, role: user.role },
-    });
+    res.status(201).json({ message: `${role || "User"} registered successfully` });
   } catch (err) {
     console.error("Register Error:", err);
     res.status(500).json({ error: "Server error" });
