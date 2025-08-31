@@ -15,6 +15,8 @@ const datasroutes = require("./routes/datasroutes");
 const exptraRoutes = require("./routes/extraroutes");
 const categoryRoutes = require('./routes/categoryRoutes')
 const employeeRoutes = require("./routes/employeeRoutes");
+const salesRoutes = require("./routes/sales"); // adjust path
+const heatmapRoutes = require("./routes/heatmap");
 dotenv.config();
 connectDB();
 
@@ -73,6 +75,9 @@ app.use("/payments", paymentRoutes);
 app.use("/extra", exptraRoutes);
 app.use("/datas", datasroutes);
 app.use("/categories", categoryRoutes);
+app.use("/sales", salesRoutes);
+app.use("/heatmap", heatmapRoutes);
+
 
 app.use("/employees", employeeRoutes);
 const PORT = process.env.PORT || 5000;
