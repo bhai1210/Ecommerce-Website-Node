@@ -80,6 +80,7 @@ exports.getAllUsers = async (_req, res) => {
   try {
     const users = await User.find()
     return res.json(users);
+    console.log(users,"my users")
   } catch (err) {
     console.error("getAllUsers error:", err);
     return res.status(500).json({ error: "Server error" });

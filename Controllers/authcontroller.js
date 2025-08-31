@@ -28,11 +28,11 @@ exports.registerUser = async (req, res) => {
     const user = new User({
       email,
       password: hashedPassword,
-      role: role || "user",
+      role: role,
     });
 
     await user.save();
-    res.status(201).json({ message: `${role || "User"} registered successfully` });
+    res.status(201).json({ message: `${role} registered successfully` });
   } catch (err) {
     console.error("Register Error:", err);
     res.status(500).json({ error: "Server error" });
