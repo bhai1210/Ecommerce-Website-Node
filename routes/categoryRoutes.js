@@ -1,17 +1,11 @@
-// routes/categoryRoutes.js
 const express = require("express");
-const {
-  getAllCategories,
-  createCategory,
-  editCategory,
-  removeCategory,
-} = require("../Controllers/categoryController");
-
 const router = express.Router();
+const categoryController = require("../controllers/categoryController");
 
-router.get("/", getAllCategories);
-router.post("/", createCategory);
-router.put("/:id", editCategory);
-router.delete("/:id", removeCategory);
+// ✅ Routes must receive functions as handlers
+router.get("/", categoryController.getCategories);
+router.post("/", categoryController.addCategory);
+router.put("/:id", categoryController.updateCategory);
+router.delete("/:id", categoryController.deleteCategory);
 
 module.exports = router;

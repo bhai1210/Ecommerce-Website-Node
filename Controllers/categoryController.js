@@ -1,43 +1,56 @@
-// controllers/categoryController.js
-const {
+
+
+const Category = require('../Models/categoryModel')
+// Get all categories
+async function getCategories() {
+  try {
+    return await Category.find().sort({ createdAt: -1 });
+  } catch (error) {
+    throw new Error('Error fetching categories: ' + error.message);
+  }
+}
+
+// Add a new category
+async function addCategory(name) {
+  try {
+    const category = new Category({ name });
+    await category.save();
+    return category;
+  } catch (error) {
+    throw new Error('Error adding category: ' + error.message);
+  }
+}
+
+// Update a category
+async function updateCategory(id, name) {
+  try {
+    const category = await Category.findByIdAndUpdate(
+      id,
+      { name },
+      { new: true }
+    );
+
+    if (!category) throw new Error('Category not found');
+    return category;
+  } catch (error) {
+    throw new Error('Error updating category: ' + error.message);
+  }
+}
+
+// Delete a category
+async function deleteCategory(id) {
+  try {
+    const category = await Category.findByIdAndDelete(id);
+    if (!category) throw new Error('Category not found');
+    return true;
+  } catch (error) {
+    throw new Error('Error deleting category: ' + error.message);
+  }
+}
+
+module.exports = {
   getCategories,
   addCategory,
   updateCategory,
   deleteCategory,
-} = require("../Models/categoryModel");
-
-// Get all categories
-function getAllCategories(req, res) {
-  res.json(getCategories());
-}
-
-// Add new category
-function createCategory(req, res) {
-  const { name } = req.body;
-  if (!name) return res.status(400).json({ error: "Name is required" });
-  const newCategory = addCategory(name);
-  res.status(201).json(newCategory);
-}
-
-// Update category
-function editCategory(req, res) {
-  const { id } = req.params;
-  const { name } = req.body;
-  if (!name) return res.status(400).json({ error: "Name is required" });
-  const updated = updateCategory(id, name);
-  res.json(updated);
-}
-
-// Delete category
-function removeCategory(req, res) {
-  const { id } = req.params;
-  deleteCategory(id);
-  res.json({ success: true });
-}
-
-module.exports = {
-  getAllCategories,
-  createCategory,
-  editCategory,
-  removeCategory,
 };
