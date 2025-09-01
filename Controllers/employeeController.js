@@ -11,11 +11,44 @@ const createEmployee = async (req, res) => {
   }
 };
 
-// ✅ Get All Employees
+// ✅ Get All Employees with Sorting, Searching, Pagination
 const getEmployees = async (req, res) => {
   try {
-    const employees = await Employee.find();
-    res.json(employees);
+    let { page = 1, limit = 10, search = "", sortBy = "createdAt", order = "desc" } = req.query;
+
+    page = parseInt(page);
+    limit = parseInt(limit);
+
+    // 🔍 Search filter (example: name, email, position fields)
+    const searchQuery = search
+      ? {
+          $or: [
+            { name: { $regex: search, $options: "i" } },
+            { email: { $regex: search, $options: "i" } },
+            { position: { $regex: search, $options: "i" } },
+          ],
+        }
+      : {};
+
+    // ↕️ Sorting
+    const sortOrder = order === "asc" ? 1 : -1;
+    const sortQuery = { [sortBy]: sortOrder };
+
+    // 📄 Pagination + Query
+    const employees = await Employee.find(searchQuery)
+      .sort(sortQuery)
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    // ✅ Get total count for pagination
+    const totalEmployees = await Employee.countDocuments(searchQuery);
+
+    res.json({
+      data: employees,
+      currentPage: page,
+      totalPages: Math.ceil(totalEmployees / limit),
+      totalEmployees,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -1,19 +1,21 @@
 const express = require("express");
+const router = express.Router();
+
 const {
-  CreateClass,
+  createClass,
   getAllClasses,
   getAllCategories,
   updateClass,
   deleteClass,
+  getAllClassesmaramate,
 } = require("../Controllers/ClassController");
 
-const router = express.Router();
-
 // Routes
-router.post("/", CreateClass);          // ✅ Create
-router.get("/", getAllClasses);         // ✅ Get all with search & category filter
-router.get("/categories", getAllCategories); // ✅ Get all categories
-router.put("/:id", updateClass);        // ✅ Update
-router.delete("/:id", deleteClass);     // ✅ Delete
+router.post("/create", createClass);
+router.get("/", getAllClasses);
+router.get("/categories", getAllCategories);
+router.put("/:id", updateClass);
+router.delete("/:id", deleteClass);
+router.get('/mara',getAllClassesmaramate)
 
 module.exports = router;
