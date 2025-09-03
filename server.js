@@ -52,27 +52,27 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// ✅ Upload Route (save to local "uploads" folder)
-app.post("/uploads", upload.single("file"), (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: "No file uploaded" });
-    }
+// // ✅ Upload Route (save to local "uploads" folder)
+// app.post("/uploads", upload.single("file"), (req, res) => {
+//   try {
+//     if (!req.file) {
+//       return res.status(400).json({ error: "No file uploaded" });
+//     }
 
-    const fileUrl = `/uploads/${req.file.filename}`; // relative path
+//     const fileUrl = `/uploads/${req.file.filename}`; // relative path
 
-    res.json({
-      message: "File uploaded successfully",
-      fileUrl, // frontend can fetch this path
-    });
-  } catch (error) {
-    console.error("Upload error:", error);
-    res.status(500).json({ error: "Upload failed" });
-  }
-});
+//     res.json({
+//       message: "File uploaded successfully",
+//       fileUrl, // frontend can fetch this path
+//     });
+//   } catch (error) {
+//     console.error("Upload error:", error);
+//     res.status(500).json({ error: "Upload failed" });
+//   }
+// });
 
-// ✅ Serve uploaded files statically
-app.use("/uploads", express.static(uploadDir));
+// // ✅ Serve uploaded files statically
+// app.use("/uploads", express.static(uploadDir));
 
 // ✅ Existing Routes
 app.use("/auth", authRoutes);
