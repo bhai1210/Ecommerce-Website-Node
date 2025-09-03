@@ -2,9 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
-
+const { put } = require("@vercel/blob");
 const connectDB = require("./ConfigData/db");
 
 // Import Routes
@@ -16,65 +14,51 @@ const categoryRoutes = require("./routes/categoryRoutes");
 const employeeRoutes = require("./routes/employeeRoutes");
 const salesRoutes = require("./routes/sales");
 const heatmapRoutes = require("./routes/heatmap");
-const orderRoutes = require('./routes/orderRoutes');
+
 dotenv.config();
 connectDB();
 
 const app = express();
 
-// ✅ Fix CORS (allow frontend domain explicitly)
-app.use(
-  cors({
-    origin: process.env.CLIENT_URL,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-  })
-);
+app.use(cors({
+  origin: process.env.CLIENT_URL || "http://localhost:5173",
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
 
 app.use(express.json());
 
-// ✅ Ensure uploads folder exists
-const uploadDir = path.join(__dirname, "uploads");
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-// ✅ setup multer (disk storage for local uploads)
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir); // save in "uploads" folder
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
-  },
-});
-
+// ✅ Multer setup (memory storage for Vercel Blob)
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// // ✅ Upload Route (save to local "uploads" folder)
-// app.post("/uploads", upload.single("file"), (req, res) => {
-//   try {
-//     if (!req.file) {
-//       return res.status(400).json({ error: "No file uploaded" });
-//     }
+// ✅ Upload Route
+app.post("/uploads", upload.single("file"), async (req, res) => {
+  try {
+    const file = req.file;
+    if (!file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
 
-//     const fileUrl = `/uploads/${req.file.filename}`; // relative path
+    const contentType = file.mimetype || "application/octet-stream";
 
-//     res.json({
-//       message: "File uploaded successfully",
-//       fileUrl, // frontend can fetch this path
-//     });
-//   } catch (error) {
-//     console.error("Upload error:", error);
-//     res.status(500).json({ error: "Upload failed" });
-//   }
-// });
+    const blob = await put(`uploads/${Date.now()}-${file.originalname}`, file.buffer, {
+      access: "public",
+      contentType,
+    });
 
-// // ✅ Serve uploaded files statically
-// app.use("/uploads", express.static(uploadDir));
+    res.json({
+      message: "File uploaded successfully",
+      fileUrl: blob.url,
+    });
+  } catch (error) {
+    console.error("Upload error:", error);
+    res.status(500).json({ error: "Upload failed" });
+  }
+});
 
-// ✅ Existing Routes
+// ✅ Routes
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/class", classRoutes);
@@ -83,9 +67,13 @@ app.use("/categories", categoryRoutes);
 app.use("/sales", salesRoutes);
 app.use("/heatmap", heatmapRoutes);
 app.use("/employees", employeeRoutes);
-app.use('/orders', orderRoutes);
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+// ✅ For Vercel (do not use app.listen)
+if (process.env.VERCEL) {
+  module.exports = app;
+} else {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+  });
+}
