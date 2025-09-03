@@ -16,7 +16,7 @@ const categoryRoutes = require("./routes/categoryRoutes");
 const employeeRoutes = require("./routes/employeeRoutes");
 const salesRoutes = require("./routes/sales");
 const heatmapRoutes = require("./routes/heatmap");
-
+const orderRoutes = require('./routes/orderRoutes');
 dotenv.config();
 connectDB();
 
@@ -83,6 +83,7 @@ app.use("/categories", categoryRoutes);
 app.use("/sales", salesRoutes);
 app.use("/heatmap", heatmapRoutes);
 app.use("/employees", employeeRoutes);
+app.use('/orders', orderRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
