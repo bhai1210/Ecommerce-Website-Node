@@ -85,21 +85,26 @@ const deleteCategory = async (req, res) => {
   }
 };
 
+// ✅ Get all categories (simple version)
 const getAllCategories = async (req, res) => {
-  const categories = await CategoryModel.find();
-  res.status(200).json(
-    categories.map((cat) => ({
-      _id: cat._id,
-      name: cat.name,
-    }))
-  );
+  try {
+    const categories = await Category.find();
+    res.status(200).json(
+      categories.map((cat) => ({
+        _id: cat._id,
+        name: cat.name,
+      }))
+    );
+  } catch (error) {
+    console.error("Error fetching all categories:", error);
+    res.status(500).json({ message: error.message });
+  }
 };
-
 
 module.exports = {
   getCategories,
   addCategory,
   updateCategory,
   deleteCategory,
-  getAllCategories
+  getAllCategories,
 };

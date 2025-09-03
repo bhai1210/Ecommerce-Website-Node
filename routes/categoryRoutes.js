@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const categoryController = require("../controllers/categoryController");
 
-// ✅ Routes must receive functions as handlers
+// ✅ Routes must receive functions as handlerss
 router.get("/", categoryController.getCategories);
 router.get('/cat',categoryController.getAllCategories)
 router.post("/", categoryController.addCategory);
