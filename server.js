@@ -15,7 +15,6 @@ const employeeRoutes = require("./routes/employeeRoutes");
 const salesRoutes = require("./routes/sales");
 const heatmapRoutes = require("./routes/heatmap");
 const orderRoutes = require("./routes/orderRoutes");
-
 const recordRoutes = require("./routes/recordRoutes");
 
 dotenv.config();
@@ -23,10 +22,14 @@ connectDB();
 
 const app = express();
 
-// ✅ CORS Setup
+// ✅ CORS Setup (allow multiple origins)
 app.use(
-  cors({  
-    origin: process.env.CLIENT_URL || "http://localhost:3000" || "http://localhost:5173" || "https://student-management-xi-six.vercel.app",
+  cors({
+    origin: [
+      process.env.CLIENT_URL,
+      "http://localhost:5173",
+      "https://student-management-xi-six.vercel.app",
+    ].filter(Boolean), // remove undefined
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -35,9 +38,12 @@ app.use(
 
 app.use(express.json());
 
-// ✅ Multer setup (memory storage for Vercel Blob)
+// ✅ Multer setup (memory storage for Vercel Blob + file size limit)
 const storage = multer.memoryStorage();
-const upload = multer({ storage });
+const upload = multer({
+  storage,
+  limits: { fileSize: 4 * 1024 * 1024 }, // 4 MB max
+});
 
 // ✅ Upload Route
 app.post("/uploads", upload.single("file"), async (req, res) => {
@@ -67,7 +73,9 @@ app.post("/uploads", upload.single("file"), async (req, res) => {
     });
   } catch (error) {
     console.error("Upload error:", error);
-    res.status(500).json({ error: "Upload failed", details: error.message });
+    res
+      .status(500)
+      .json({ error: "Upload failed", details: error.message });
   }
 });
 
