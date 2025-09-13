@@ -16,6 +16,8 @@ const salesRoutes = require("./routes/sales");
 const heatmapRoutes = require("./routes/heatmap");
 const orderRoutes = require("./routes/orderRoutes");
 
+const recordRoutes = require("./routes/recordRoutes");
+
 dotenv.config();
 connectDB();
 
@@ -24,7 +26,7 @@ const app = express();
 // ✅ CORS Setup
 app.use(
   cors({  
-    origin: process.env.CLIENT_URL || "http://localhost:5173" || "https://student-management-xi-six.vercel.app",
+    origin: process.env.CLIENT_URL || "http://localhost:3000" || "http://localhost:5173" || "https://student-management-xi-six.vercel.app",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -79,6 +81,7 @@ app.use("/sales", salesRoutes);
 app.use("/heatmap", heatmapRoutes);
 app.use("/employees", employeeRoutes);
 app.use("/orders", orderRoutes);
+app.use("/records", recordRoutes);
 
 // ✅ Server Listen
 const PORT = process.env.PORT || 5000;
