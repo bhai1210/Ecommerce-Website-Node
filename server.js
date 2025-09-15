@@ -23,6 +23,10 @@ connectDB();
 const app = express();
 
 // ✅ CORS Setup (allow multiple origins)
+
+
+
+// this is cors setup
 app.use(
   cors({
     origin: [
