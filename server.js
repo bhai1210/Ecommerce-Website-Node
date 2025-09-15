@@ -50,6 +50,9 @@ const upload = multer({
 });
 
 // ✅ Upload Route
+
+
+// this is my new code for uploading
 app.post("/uploads", upload.single("file"), async (req, res) => {
   try {
     if (!req.file) {
