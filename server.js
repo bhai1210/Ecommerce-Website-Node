@@ -83,6 +83,8 @@ app.post("/uploads", upload.single("file"), async (req, res) => {
   }
 });
 
+
+// "belove are my routes"
 // ✅ Routes
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
