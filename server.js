@@ -52,36 +52,25 @@ const upload = multer({
 // ✅ Upload Route
 app.post("/uploads", upload.single("file"), async (req, res) => {
   try {
-    const file = req.file;
-
-    if (!file) {
+    if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
-    // infer content type
-    const contentType = file.mimetype || "application/octet-stream";
+    const contentType = req.file.mimetype || "application/octet-stream";
 
-    // upload to Vercel Blob
     const blob = await put(
-      `uploads/${Date.now()}-${file.originalname}`,
-      file.buffer,
-      {
-        access: "public",
-        contentType,
-      }
+      `uploads/${Date.now()}-${req.file.originalname}`,
+      req.file.buffer,
+      { access: "public", contentType }
     );
 
-    res.json({
-      message: "File uploaded successfully",
-      fileUrl: blob.url,
-    });
+    res.json({ message: "File uploaded successfully", fileUrl: blob.url });
   } catch (error) {
     console.error("Upload error:", error);
-    res
-      .status(500)
-      .json({ error: "Upload failed", details: error.message });
+    res.status(500).json({ error: "Upload failed", details: error.message });
   }
 });
+
 
 
 // "belove are my routes"
